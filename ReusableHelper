@@ -1,0 +1,200 @@
+import {
+	ShowToastEvent
+} from 'lightning/platformShowToastEvent';
+
+const badInputMessage = {
+	dateRangeOverflow: 'This date cannot be a future date',
+};
+
+const showToast = (title, message, variant) => {
+	const event = new ShowToastEvent({
+		title: title,
+		message: message,
+		variant: variant
+	});
+	return event;
+}
+
+const formattedDate = (str) => {
+	let formatDate = 'last 2 weeks';
+	if (str) {
+		var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+		var now = new Date(str);
+		formatDate = months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+	}
+	return formatDate
+}
+
+const deFormatPhoneNumber = (str) => {
+	let number = null;
+	if (str) {
+		number = str.replace(/[^0-9]/g, '');
+	}
+	return number;
+}
+
+const formatPhoneNumber = (str) => {
+	console.log('str in formatPhoneNumber ', str);
+	str = str.toString();
+	var numbers = str.replace(/\D/g, ""),
+		char = {
+			0: "(",
+			3: ") ",
+			6: "-"
+		};
+	console.log('numbers in formatPhoneNumber ', numbers);
+	str = "";
+	for (var i = 0; i < numbers.length; i++) {
+		str += (char[i] || "") + numbers[i];
+	}
+	return str;
+}
+
+const calculateNumberOfDays = (date1, date2) => {
+	if (date1 && date1 != '' && date2 && date2 != '') {
+		var date1 = new Date(date1);
+		var date2 = new Date(date2);
+		var Difference_In_Time = date2.getTime() - date1.getTime();
+		var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+		return Difference_In_Days;
+	} else {
+		return null;
+	}
+
+}
+
+const isValid = (_this) => {
+	let valid = true;
+
+	let isAllValid4 = true;
+	let phoneInputs = [..._this.template.querySelectorAll(".phone-input")];
+	phoneInputs.forEach(input => {
+		if (input.value) {
+			console.log("input.value", input.value);
+			let formattedPhone = deFormatPhoneNumber(input.value);
+			console.log('formattedPhone', formattedPhone);
+			let pattern = new RegExp("^(?!0{10})");
+			let result = pattern.test(formattedPhone);
+			console.log('result', result);
+			console.log('isAllValid4', isAllValid4);
+			if (result === false) {
+				input.setCustomValidity("Please enter valid phone number.");
+				isAllValid4 = false;
+			} else {
+				input.setCustomValidity(""); // if there was a custom error before, reset it
+			}
+			console.log('isAllValid4', isAllValid4);
+		}
+	});
+
+
+	let isAllValid = [
+		..._this.template.querySelectorAll("lightning-input")
+	].reduce((validSoFar, input) => {
+		if (input && input.value) input.value = input.value.trim();
+		input.reportValidity();
+		return validSoFar && input.checkValidity();
+	}, true);
+
+	let isAllValid1 = [
+		..._this.template.querySelectorAll("lightning-combobox")
+	].reduce((validSoFar, input) => {
+		input.reportValidity();
+		return validSoFar && input.checkValidity();
+	}, true);
+
+	let isAllValid2 = [
+		..._this.template.querySelectorAll("lightning-radio-group")
+	].reduce((validSoFar, input) => {
+		input.reportValidity();
+		return validSoFar && input.checkValidity();
+	}, true);
+
+
+	let isAllValid3 = [
+		..._this.template.querySelectorAll("lightning-checkbox-group")
+	].reduce((validSoFar, input) => {
+		input.reportValidity();
+		return validSoFar && input.checkValidity();
+	}, true);
+
+	//let lookupInputs = [..._this.template.querySelectorAll(".lookup-input")];
+	//console.log('lookupInputs', lookupInputs);
+	//phoneInputs.forEach(input => {
+	//	console.log('input', input);
+	//	if (input.value) {
+
+	//	}
+	//});
+
+	//let isAllValid4 = [
+	//	..._this.template.querySelectorAll(".phone-input")
+	//].reduce((validSoFar, input) => {
+	//	console.log('input', input.value);
+	//	if(input.value){
+	//		console.log("input.value", input.value);
+	//		let formattedPhone = deFormatPhoneNumber(input.value);
+	//		console.log('formattedPhone', formattedPhone);
+	//		let pattern = new RegExp("^(?!0{10})");
+	//		let result = pattern.test(formattedPhone);
+	//		console.log('result',result);
+	//		console.log('validSoFar', validSoFar);
+	//		if (result === false) {
+	//			input.setCustomValidity("Please enter valid phone number.");
+	//			validSoFar = false;
+	//		}
+	//		console.log('validSoFar', validSoFar);
+	//	}
+	//	return validSoFar ;
+	//}, true);
+
+
+	console.log('All Valid', isAllValid, "isAllValid1", isAllValid1, "isAllValid2", isAllValid2, "isAllValid3", isAllValid3, "isAllValid4", isAllValid4);
+	valid = isAllValid && isAllValid1 && isAllValid2 && isAllValid3 && isAllValid4;
+	console.log('valid', valid);
+	return valid;
+}
+
+const todayDate = () => {
+	let today = new Date();
+	var dd = today.getDate();
+	var mm = today.getMonth() + 1;
+	var yyyy = today.getFullYear();
+
+	if (dd < 10) dd = '0' + dd;
+	if (mm < 10) mm = '0' + mm;
+	return (yyyy + '-' + mm + '-' + dd);
+}
+
+const currentTime = () => {
+	let today = new Date();
+	return (today.getHours() + ":" + today.getMinutes() + ":00.000Z");
+}
+
+const getErrorMessage = (error) => {
+	let erroMsg = error.message || error.body.message ||
+		(error.body && error.body.pageErrors && error.body.pageErrors[0].message) ||
+		(error.body && error.body.fieldErrors && error.body.fieldErrors[0].message);
+	if (erroMsg.includes('FIELD_CUSTOM_VALIDATION_EXCEPTION')) {
+		let erroMsgArray = erroMsg.split('FIELD_CUSTOM_VALIDATION_EXCEPTION,');
+		if (erroMsgArray.length > 1) {
+			erroMsg = erroMsgArray[1];
+			erroMsg = erroMsg.replace(": []", "");
+		}
+	}
+
+	return erroMsg;
+}
+
+export {
+	showToast,
+	isValid,
+	deFormatPhoneNumber,
+	formatPhoneNumber,
+	formattedDate,
+	todayDate,
+	currentTime,
+	badInputMessage,
+	calculateNumberOfDays,
+	getErrorMessage
+};
