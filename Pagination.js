@@ -11,6 +11,7 @@ export default class nm_paginator extends LightningElement {
     @api pageSizeOptions = recordsPerPage; //Page size options; valid values are array of integers
     @api totalRecords; //Total no.of records; valid type is Integer
     @api records; //All records available in the data table; valid type is Array 
+    @api defaultPageSize; //No. of records to be displayed by default
     @track pageSize; //No.of records to be displayed per page
     @track totalPages; //Total no.of pages
     @track pageNumber = pageNumber; //Page number
@@ -27,6 +28,9 @@ export default class nm_paginator extends LightningElement {
         else{
             this.pageSize = this.totalRecords;
             this.showPagination = false;
+        }
+        if(this.defaultPageSize){
+            this.pageSize = this.defaultPageSize;
         }
         this.controlPagination = this.showPagination === false ? hideIt : showIt;
         this.setRecordsToDisplay();
