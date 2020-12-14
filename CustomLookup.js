@@ -1,6 +1,6 @@
 import { LightningElement, track, wire, api } from "lwc";  
  import findRecords from "@salesforce/apex/LwcLookupController.findRecords";  
- export default class LwcLookup extends LightningElement {  
+ export default class CustomLookup extends LightningElement {  
   @track recordsList;  
   @track searchKey = "";  
   @api selectedValue;  
