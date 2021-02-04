@@ -5,7 +5,7 @@ export default class PaginationWithPersistedRows extends LightningElement {
     @track data = [];
     @track recordId;
     @track pageNumber = 1;
-    @track pageSize = 2;
+    @track pageSize = 10;
     @track isLastPage = false;
     @track resultSize = 0;
     @track selection = [];
