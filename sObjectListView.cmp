@@ -1,0 +1,18 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" access="global"
+                controller="SearchController">
+    <aura:attribute name="objectAPIName" type="String" default="Account" />
+    <aura:attribute name="fieldApiNameList" type="List" default="Id,Name,Phone"/>
+    <aura:attribute name="dataList" type="List" default="[]"/> 
+    <aura:attribute name="hasData" type="Boolean" default="false"/> 
+    
+    <aura:handler name="init" value="this" action="{!c.doInit}" />
+    <aura:handler name="sortingSearchingEvent" event="c:GenericEvent" 
+                  action="{!c.handleSortSearchEvent}"/> 
+    <aura:if isTrue="{!v.hasData}">
+        <c:GenericPagination 
+                             aura:id="genCmp" 
+                             fieldList="{!v.fieldApiNameList}" 
+                             dataList="{!v.dataList}" 
+                             fieldApiList="{!v.fieldApiNameList}"/>
+    </aura:if>
+</aura:component>
