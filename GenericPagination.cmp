@@ -1,0 +1,120 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >
+	<aura:attribute name="data" type="Object"/>
+    <aura:attribute name="columns" type="List"/>
+    <aura:attribute name="recordId" type="String"/>
+    
+    <aura:attribute name="allData" type="List"/>
+    <aura:attribute name="currentPageNumber" type="Integer" default="1"/>
+    <aura:attribute name="pageSize" type="Integer" default="2"/>
+    <aura:attribute name="totalPages" type="Integer" default="0"/>
+    <aura:attribute name="pageList" type="List"/>
+    <aura:attribute name="returnedJSON" type="String" />
+    <aura:attribute name="fieldsAPINameList" type="string" 
+                    default="Name,Type,AnnualRevenue, Createddate"/>
+    <aura:attribute name="columnsLabelList" type="string"  
+                    default="Account Name,Account Type, Revenue, Createddate"/>
+    <aura:attribute name="objAPIname" type="String"  
+                    default="Account" description="Object API name"/>
+    <aura:attribute name="sortingOrder" type="String" 
+                    default="LastModifiedDate DESC" description="Specify the sorting order of records"/>
+    <aura:attribute name="filterCriteria" type="String" default="isDeleted = false"   
+                    description="Criteria to filter records on UI. Leave blank in order to display all record"/>
+    <aura:attribute name="recordsLimit" type="String" default="200"   
+                    description="Number of records to display on UI"/>
+    
+    <aura:attribute name="fieldList" type="List"/>
+    <aura:attribute name="fieldApiList" type="List"/>
+    
+    <aura:attribute name="dataList" type="List"/>
+    <aura:attribute name="serialNumber" type="Integer" default="0"/>
+    <aura:attribute name="objectDataList" type="List"/>
+    <aura:attribute name="searchKeyword" type="String"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <aura:registerEvent name="sortingSearchingEvent" type="c:GenericEvent"/>
+    <aura:method name="passFinalList" action="{!c.displayFinalList}">
+        <aura:attribute name="finalDataList" type="List"/>
+    </aura:method>
+    
+    <div class="slds-box slds-scrollable_y" style="height:100%;">
+        <!-- Search Section Start-->
+        <div class="slds-form_horizontal slds-form slds-grid slds-wrap">
+            <div class="slds-col slds-size_4-of-6">
+                <lightning:input type="search" value="{!v.searchKeyword}" fieldName="Search" onchange="{!c.handleChange}" placeholder="Search"/>  
+            </div>
+            <div class="slds-col slds-size_2-of-6">
+                <lightning:button variant="brand" label="Search" onclick="{!c.handleClick}" class="buttonCss"/>
+            </div>
+        </div>  <br/>
+        <!-- Search Section End-->
+        
+        <table class="slds-table slds-table--bordered slds-wrap  slds-max-medium-table--stacked-horizontal">
+            <thead>
+                <tr class="slds-text-title_caps">
+                    <th scope="col" class="slds-cell-wrap">
+                        <div class="slds-truncate slds-cell-wrap" title="Name">Sl. No.</div>
+                    </th>
+                    <aura:iteration items="{!v.fieldList}" var="col" indexVar="index"> 
+                        
+                        <th scope="col" data-value="{!col}" class="divHover slds-cell-wrap">
+                            <div class="slds-truncate slds-cell-wrap">{!col}
+                          
+                            </div>
+                        </th>
+                    </aura:iteration>
+                    <th scope="col" class="slds-cell-wrap">
+                        <div class="slds-truncate slds-cell-wrap" title="Phone">Action</div>
+                    </th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                <aura:iteration items="{!v.data}" var="obj" indexVar="index">
+                    <tr>
+                        <th scope="row" class="slds-cell-wrap">
+                            {!(v.currentPageNumber-1)*(v.pageSize)+index+1}
+                        </th>
+                        <aura:iteration items="{!v.fieldList}" var="fList" indexVar="rowIndex">
+                            <th scope="row" class="slds-cell-wrap">
+                                <div class="slds-truncate slds-cell-wrap">
+                                    <c:RowDataForPaginationComponent fieldName="{!fList}" fieldData="{!obj}"/>
+                                </div>
+                            </th>
+                        </aura:iteration>
+                        
+                        <th scope="row" class="slds-cell-wrap"> 
+                            <lightning:button  label="View" name="{!obj}" class=""  variant="brand" onclick="{!c.viewRecord}"/>
+                        </th>
+                    </tr>
+                </aura:iteration>
+            </tbody>
+        </table>
+        <aura:if isTrue="{! empty(v.data)}">
+            <br/><span class="absoluteCenter"><strong>No Records</strong></span>
+        </aura:if>
+        
+        <!-- Pagination Section Start-->
+        <lightning:layout multipleRows="true" horizontalAlign="center">
+            <lightning:layoutItem padding="around-small" flexibility="auto">
+                <aura:if isTrue="{!v.totalPages != 1}">
+                    <aura:if isTrue="{!v.currentPageNumber != 1}">
+                        <lightning:button label="First" iconName="utility:left" iconPosition="left"
+                                          onclick="{!c.onFirst}" disabled="{! v.currentPageNumber == 1}"/>
+                        <lightning:button iconName="utility:chevronleft" iconPosition="left"
+                                          onclick="{!c.onPrev}" disabled="{! v.currentPageNumber == 1}"/>
+                    </aura:if>
+                    
+                    <aura:if isTrue="{!v.totalPages != v.currentPageNumber}">    
+                        <lightning:button iconName="utility:chevronright" iconPosition="right" 
+                                          disabled="{! v.currentPageNumber == v.totalPages}" onclick="{!c.onNext}"/>
+                        <lightning:button label="Last" iconName="utility:right" iconPosition="right" 
+                                          disabled="{! v.currentPageNumber == v.totalPages}" onclick="{!c.onLast}"/>
+                    </aura:if>
+                </aura:if>
+                
+            </lightning:layoutItem>
+        </lightning:layout>
+        <!-- Pagination Section End-->
+        
+    </div>
+</aura:component>
